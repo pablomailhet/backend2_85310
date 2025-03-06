@@ -5,10 +5,10 @@ import passport from "passport";
 
 const userRouter = Router();
 
-userRouter.get("/", passport.authenticate("jwt"), authorization("Admin"), getUsers);
-userRouter.get("/:uid", passport.authenticate("jwt"), authorization("Admin"), getUser);
-userRouter.post("/", passport.authenticate("jwt"), authorization("Admin"), createUser);
-userRouter.put("/:uid", passport.authenticate("jwt"), authorization("Admin"), updateUser);
-userRouter.delete("/:uid", passport.authenticate("jwt"), authorization("Admin"), deleteUser);
+userRouter.get("/", passport.authenticate("jwt"), authorization("admin"), getUsers);
+userRouter.get("/:uid", passport.authenticate("jwt"), authorization("admin"), getUser);
+userRouter.post("/", passport.authenticate("jwt"), authorization("admin"), createUser);
+userRouter.put("/:uid", passport.authenticate("jwt"), authorization("admin"), updateUser);
+userRouter.delete("/:uid", passport.authenticate("jwt"), authorization("admin"), deleteUser);
 
 export default userRouter;
