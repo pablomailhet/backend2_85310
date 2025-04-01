@@ -162,7 +162,7 @@ export const checkout = async (req, res) => {
             const newTicket = await ticketModel.create({
                 code: crypto.randomUUID(),
                 amount: totalAmount,
-                purcharser: req.user.email,
+                purchaser: req.user.email,
                 products: cart.products
             });
 

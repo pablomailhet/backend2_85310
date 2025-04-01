@@ -8,7 +8,7 @@ const ticketSchema = new Schema({
         required: true,
         unique: true
     },
-    purchase_datatime: {
+    purchase_datetime: {
         type: Date,
         default: Date.now
     },
@@ -16,7 +16,7 @@ const ticketSchema = new Schema({
         type: Number,
         required: true
     },
-    purcharser: {
+    purchaser: {
         type: String,
         required: true
     },
