@@ -1,10 +1,10 @@
+import dotenv from "dotenv";
 import passport from 'passport';
 import local from 'passport-local';
 import GithubStrategy from 'passport-github2';
 import { validatePassword, hashPassword } from '../utils/bcrypt.js';
 import userModel from '../models/users.models.js';
 import jwt from 'passport-jwt';
-import dotenv from "dotenv";
 
 dotenv.config();
 
@@ -31,17 +31,17 @@ const initializatePassword = () => {
         usernameField: 'email'
     }, async (req, username, password, done) => {
         try {
-            const { first_name, last_name, email, password, age, gender } = req.body;
+            const { first_name, last_name, email, password, age } = req.body;
             const newUser = await userModel.create({
                 first_name: first_name,
                 last_name: last_name,
                 email: email,
                 password: hashPassword(password),
-                age: age,
-                gender: gender
+                age: age
             })
             return done(null, newUser);
-        } catch (error) {
+        }
+        catch (error) {
             return done(error);
         }
     }))

@@ -1,5 +1,5 @@
 import { model, Schema } from "mongoose";
-import cartModel from "./carts.model.js";
+import cartModel from "./carts.models.js";
 
 const userCollection = "users";
 
@@ -29,10 +29,6 @@ const userSchema = new Schema({
         type: Number,
         default: null
     },
-    gender: {
-        type: String,
-        default: ""
-    },
     rol: {
         type: String,
         default: "user",
@@ -45,13 +41,13 @@ const userSchema = new Schema({
 
 userSchema.post("save", async (userCreated) => {
     try {
-        const newCart = await cartModel.create({ products: [] })
+        const newCart = await cartModel.create({ products: [] });
         await model("users").findByIdAndUpdate(userCreated._id, {
             cart: newCart._id
-        })
+        });
     }
     catch (error) {
-        console.log(error)
+        console.log(error);
     }
 })
 

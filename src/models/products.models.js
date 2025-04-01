@@ -22,24 +22,19 @@ const productSchema = new Schema({
         type: Number,
         required: true,
         validate: {
-            validator: function (value) {
-                return value > 0;
-            },
+            validator: value => value > 0,
             message: 'Debe ingresar un número mayor a 0'
         }
     },
     status: {
         type: Boolean,
-        required: true,
         default: true
     },
     stock: {
         type: Number,
         required: true,
         validate: {
-            validator: function (value) {
-                return value > 0;
-            },
+            validator: value => value > 0,
             message: 'Debe ingresar un número mayor a 0'
         }
     },

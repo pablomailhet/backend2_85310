@@ -13,7 +13,7 @@ indexRouter.use("/api/products", productRouter);
 indexRouter.use("/api/carts", cartRouter);
 
 indexRouter.use("*", (req, res) => {
-    res.status(404).send({ status: "error", message: "Ruta no encontrada" });
+    res.status(404).json({ status: "error", message: "Ruta no encontrada" });
 });
 
 export default indexRouter;

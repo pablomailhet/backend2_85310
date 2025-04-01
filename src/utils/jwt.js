@@ -16,9 +16,8 @@ export const generateToken = (user) => {
         _id: user._id,
         first_name: user.first_name,
         last_name: user.last_name,
-        email: user.email,
         age: user.age,
-        gender: user.gender,
+        email: user.email,
         rol: user.rol
 
     }, jwtSecret, { expiresIn: '24h' });

@@ -1,4 +1,6 @@
-import cartModel from "../models/carts.model.js";
+import cartModel from "../models/carts.models.js";
+import ticketModel from "../models/tickets.models.js";
+import productModel from "../models/products.models.js";
 
 export const getCart = async (req, res) => {
     try {
@@ -7,13 +9,13 @@ export const getCart = async (req, res) => {
         const cart = await cartModel.findById(cid);
 
         if (!cart) {
-            return res.status(404).send({ status: "error", message: "Cart not found" });
+            return res.status(404).json({ status: "error", message: "Cart not found" });
         }
 
-        res.send({ status: "success", cart });
+        res.status(200).json({ status: "success", cart });
     }
     catch (error) {
-        res.status(500).send({ status: "error", message: error.message });
+        res.status(500).json({ status: "error", message: error.message });
     }
 }
 
@@ -21,10 +23,10 @@ export const createCart = async (req, res) => {
     try {
         let cart = req.body;
         const newCart = await cartModel.create(cart);
-        res.status(201).send({ status: "success", message: "Cart added", cart: newCart });
+        res.status(201).json({ status: "success", message: "Cart added", cart: newCart });
     }
     catch (error) {
-        res.status(500).send({ status: "error", message: error.message });
+        res.status(500).json({ status: "error", message: error.message });
     }
 }
 
@@ -40,11 +42,11 @@ export const insertProductCart = async (req, res) => {
         const cart = await cartModel.findById(cid);
 
         if (!cart) {
-            return res.status(404).send({ status: "error", message: "Cart not found" });
+            return res.status(404).json({ status: "error", message: "Cart not found" });
         }
 
         if (!await productModel.findById(pid)) {
-            return res.status(404).send({ status: "error", message: "Product not found" });
+            return res.status(404).json({ status: "error", message: "Product not found" });
         }
 
         const products = cart.products;
@@ -64,11 +66,11 @@ export const insertProductCart = async (req, res) => {
 
         await cart.save();
 
-        res.status(201).send({ status: "success", message: "Product added in cart" });
+        res.status(201).json({ status: "success", message: "Product added in cart" });
 
     }
     catch (error) {
-        res.status(500).send({ status: "error", message: error.message });
+        res.status(500).json({ status: "error", message: error.message });
     }
 }
 
@@ -85,15 +87,15 @@ export const deleteProductCart = async (req, res) => {
         );
 
         if (!updatedCart) {
-            return res.status(404).send({ status: "error", message: "Cart not found" });
+            return res.status(404).json({ status: "error", message: "Cart not found" });
         }
 
-        res.send({ status: "success", message: "Product deleted from cart", cart: updatedCart });
+        res.status(200).json({ status: "success", message: "Product deleted from cart", cart: updatedCart });
 
     }
     catch (error) {
 
-        res.status(500).send({ status: "error", message: error.message });
+        res.status(500).json({ status: "error", message: error.message });
 
     }
 }
@@ -110,15 +112,78 @@ export const deleteCart = async (req, res) => {
         );
 
         if (!updatedCart) {
-            return res.status(404).send({ status: "error", message: "Cart not found" });
+            return res.status(404).json({ status: "error", message: "Cart not found" });
         }
 
-        res.send({ status: "success", message: "All products deleted from cart", cart: updatedCart });
+        res.status(200).json({ status: "success", message: "All products deleted from cart", cart: updatedCart });
 
     }
     catch (error) {
 
-        res.status(500).send({ status: "error", message: error.message });
+        res.status(500).json({ status: "error", message: error.message });
 
+    }
+}
+
+export const checkout = async (req, res) => {
+    try {
+
+        const prodSinStock = [];
+        const cid = req.params.cid;
+        const cart = await cartModel.findById(cid);
+
+        if (!cart) {
+            return res.status(404).json({ status: "error", message: "Cart not found" });
+        }
+
+        //Verificar que todos los productos tengan stock suficiente
+        for (const prod of cart.products) {
+            let producto = await productModel.findById(prod.product);
+            if (producto) {
+                if (producto.stock - prod.quantity < 0) {
+                    prodSinStock.push(producto.id);
+                }
+            }
+        }
+
+        if (prodSinStock.length === 0) { //Si todos los productos pueden comprarse continuo con la compra
+            let totalAmount = 0;
+
+            //Descuento el stock de cada producto y voy calculando el total de compra
+            for (const prod of cart.products) {
+                const producto = await productModel.findById(prod.product);
+                if (producto) {
+                    producto.stock -= prod.quantity;
+                    totalAmount += producto.price * prod.quantity;
+                    await producto.save();
+                }
+            }
+
+            const newTicket = await ticketModel.create({
+                code: crypto.randomUUID(),
+                amount: totalAmount,
+                purcharser: req.user.email,
+                products: cart.products
+            });
+
+            await cartModel.findByIdAndUpdate(cid, { products: [] });
+            res.status(200).json({ status: "success", ticket: newTicket });
+        }
+        else {
+            //Saco los productos sin stock del carrito
+            prodSinStock.forEach((prodId) => {
+                let indice = cart.products.findIndex(prod => prod.id == prodId);
+                cart.products.splice(indice, 1);
+            })
+            //Actualizo mi carrito en la BDD
+            await cartModel.findByIdAndUpdate(cid, {
+                products: cart.products
+            });
+            res.status(400).json({ status: "error", message: "Productos sin stock", prodSinStock: prodSinStock });
+        }
+
+    }
+    catch (error) {
+        res.status(500).json({ status: "error", message: error.message });
     }
 }
