@@ -21,7 +21,7 @@ const cartSchema = new Schema({
     }
 });
 
-cartSchema.pre("findOne", () => {
+cartSchema.pre("findOne", function () {
     this.populate("products.product");
 });
 

@@ -136,6 +136,10 @@ export const checkout = async (req, res) => {
             return res.status(404).json({ status: "error", message: "Cart not found" });
         }
 
+        if (cart.products.length === 0) {
+            return res.status(404).json({ status: "error", message: "Products is empty" });
+        }
+
         //Verificar que todos los productos tengan stock suficiente
         for (const prod of cart.products) {
             let producto = await productModel.findById(prod.product);

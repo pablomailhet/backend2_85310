@@ -39,7 +39,7 @@ const userSchema = new Schema({
     }
 });
 
-userSchema.post("save", async (userCreated) => {
+userSchema.post("save", async function (userCreated) {
     try {
         const newCart = await cartModel.create({ products: [] });
         await model("users").findByIdAndUpdate(userCreated._id, {
